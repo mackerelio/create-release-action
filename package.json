@@ -31,8 +31,11 @@
   },
   "devDependencies": {
     "@actions/io": "^2.0.0",
+    "@eslint/eslintrc": "^3.3.3",
+    "@eslint/js": "^9.39.2",
     "@vercel/ncc": "^0.38.4",
     "eslint": "^9.39.2",
+    "globals": "^16.5.0",
     "jest": "^30.2.0"
   }
 }
