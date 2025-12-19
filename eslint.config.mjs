@@ -25,8 +25,8 @@ export default defineConfig([globalIgnores(["**/dist/"]), {
             SharedArrayBuffer: "readonly",
         },
 
-        ecmaVersion: 2018,
-        sourceType: "commonjs",
+        ecmaVersion: "latest",
+        sourceType: "module",
     },
 
     rules: {},
