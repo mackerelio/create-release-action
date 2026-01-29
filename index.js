@@ -1,6 +1,8 @@
-const core = require('@actions/core');
-const github = require('@actions/github');
-const read = require('fs-readdir-recursive');
+import { getInput, startGroup, info, endGroup, setFailed } from '@actions/core';
+import { getOctokit, context as _context } from '@actions/github';
+import read from 'fs-readdir-recursive';
+import fs from 'fs/promises';
+import { basename } from 'path';
 
 async function readPR (octokit, context, bumpUpBranchPrefix, version) {
   const { repo: { owner, repo } } = context;
@@ -22,17 +24,16 @@ async function readPR (octokit, context, bumpUpBranchPrefix, version) {
 
 async function run() {
   try {
-    const fs = require('fs').promises;
-    const path = require('path');
 
-    const token = core.getInput('github-token');
-    const directory = core.getInput('directory');
-    const tagPrefix = core.getInput('tag-prefix');
-    const bumpUpBranchPrefix = core.getInput('bump-up-branch-prefix');
 
-    const octokit = github.getOctokit(token);
+    const token = getInput('github-token');
+    const directory = getInput('directory');
+    const tagPrefix = getInput('tag-prefix');
+    const bumpUpBranchPrefix = getInput('bump-up-branch-prefix');
 
-    const context = github.context;
+    const octokit = getOctokit(token);
+
+    const context = _context;
     const { repo: { owner, repo }, ref } = context;
 
     const tag = ref.replace('refs/tags/', '');
@@ -48,18 +49,18 @@ async function run() {
 
     const artifacts = read('.', () => true, [], directory);
 
-    core.startGroup('Assets')
+    startGroup('Assets')
     for (let file of artifacts) {
-      core.info('uploading ' + file);
+      info('uploading ' + file);
 
       await octokit.rest.repos.uploadReleaseAsset({
         owner, repo,
         release_id: release.data.id,
-        name: path.basename(file),
+        name: basename(file),
         data: await fs.readFile(file),
       });
     }
-    core.endGroup()
+    endGroup()
 
     await octokit.rest.repos.updateRelease({
       owner,
@@ -70,9 +71,9 @@ async function run() {
       body: prText,
     });
 
-    core.info("\u001b[1mRelease: " + release.data.html_url);
+    info("\u001b[1mRelease: " + release.data.html_url);
   } catch (error) {
-    core.setFailed(error.message);
+    setFailed(error.message);
   }
 }
 
